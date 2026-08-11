@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Checkout — {{ company_name }}{% endblock %}
+{% block content %}
+
+<div class="container my-4">
+    <h3 class="mb-4"><i class="bi bi-credit-card me-2"></i>Checkout</h3>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="bg-white rounded-3 shadow-sm p-4 mb-3">
+                <h6>Order Items</h6>
+                {% for item in items %}
+                <div class="d-flex justify-content-between small py-1 border-bottom">
+                    <span>{{ item.product.name }} ({{ item.product.condition_label() }}) x{{ item.quantity }}</span>
+                    <span>P{{ '{:,.2f}'.format(item.line_total()) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <form method="POST" action="{{ url_for('checkout.checkout') }}">
+                <div class="bg-white rounded-3 shadow-sm p-4 mb-3">
+                    <h6>Delivery</h6>
+                    <div class="form-check">
+                        <input type="radio" name="delivery_method" value="collection" id="delCollect" class="form-check-input" checked onchange="document.getElementById('addressBlock').style.display='none'">
+                        <label class="form-check-label" for="delCollect">Campus Collection</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input type="radio" name="delivery_method" value="delivery" id="delDeliver" class="form-check-input" onchange="document.getElementById('addressBlock').style.display='block'">
+                        <label class="form-check-label" for="delDeliver">Deliver to Me</label>
+                    </div>
+
+                    <label class="form-label small">Campus</label>
+                    <input type="text" name="campus" class="form-control mb-2" value="{{ current_user.campus or '' }}" placeholder="e.g. University of Botswana (UB)">
+
+                    <div id="addressBlock" style="display:none;">
+                        <label class="form-label small">Delivery Address</label>
+                        <textarea name="delivery_address" class="form-control" rows="2" placeholder="Street, plot number, area..."></textarea>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3 shadow-sm p-4 mb-3">
+                    <h6>Pay Deposit With</h6>
+                    <select name="payment_method" class="form-select mb-2" required>
+                        {% for m in payment_methods %}
+                        <option value="{{ m }}">
+                            {% if m == 'orange_money' %}Orange Money
+                            {% elif m == 'mascom_myzaka' %}Mascom MyZaka
+                            {% elif m == 'card' %}Debit / Credit Card
+                            {% else %}Test Payment (Mock — for development){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <label class="form-label small">Phone Number (for mobile money) / Card Reference</label>
+                    <input type="text" name="payer_identifier" class="form-control" placeholder="e.g. 71234567" value="{{ current_user.phone or '' }}">
+                    <p class="small text-muted mt-2 mb-0">
+                        <i class="bi bi-info-circle me-1"></i>Only "Test Payment" is live in this environment — real mobile money
+                        gateways require merchant credentials to be configured first.
+                    </p>
+                </div>
+
+                <button type="submit" class="btn btn-orbit btn-lg w-100">Pay Deposit — P{{ '{:,.2f}'.format(deposit_due) }}</button>
+            </form>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="bg-white rounded-3 shadow-sm p-4">
+                <h5>Payment Summary</h5>
+                <div class="d-flex justify-content-between my-2">
+                    <span>Subtotal</span><span>P{{ '{:,.2f}'.format(subtotal) }}</span>
+                </div>
+                <div class="deposit-box my-3">
+                    <p class="small text-muted mb-0">Deposit Due Today</p>
+                    <p class="amount mb-0">P{{ '{:,.2f}'.format(deposit_due) }}</p>
+                </div>
+                <div class="d-flex justify-content-between text-muted small">
+                    <span>Balance on Arrival</span><span>P{{ '{:,.2f}'.format(balance_due) }}</span>
+                </div>
+                <hr>
+                <p class="small text-muted mb-0"><i class="bi bi-shield-check me-1"></i>Your device will take approximately {{ config.PREORDER_LEAD_DAYS }} working days to arrive. We'll notify you the moment it does.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

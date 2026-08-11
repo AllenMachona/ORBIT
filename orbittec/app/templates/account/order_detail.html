@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Order {{ order.order_number }} — {{ company_name }}{% endblock %}
+{% block content %}
+
+<div class="container my-4">
+    <a href="{{ url_for('account.orders') }}" class="small text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Back to Orders</a>
+    <h3 class="mt-2 mb-4">Order {{ order.order_number }}</h3>
+
+    {% if order.status != 'cancelled' %}
+    <div class="bg-white rounded-3 shadow-sm p-4 mb-4">
+        <div class="status-tracker">
+            {% set step = order.status_step() %}
+            <div class="status-step {{ 'done' if step >= 1 }}"><div class="dot">1</div><div class="label">Pending</div></div>
+            <div class="status-step {{ 'done' if step >= 2 }} {{ 'current' if step == 2 }}"><div class="dot">2</div><div class="label">Deposit Paid</div></div>
+            <div class="status-step {{ 'done' if step >= 3 }} {{ 'current' if step == 3 }}"><div class="dot">3</div><div class="label">Arrived</div></div>
+            <div class="status-step {{ 'done' if step >= 4 }} {{ 'current' if step == 4 }}"><div class="dot">4</div><div class="label">Delivered</div></div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-danger">This order was cancelled. Reason: {{ order.cancelled_reason }}</div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="bg-white rounded-3 shadow-sm p-4 mb-3">
+                <h6>Items</h6>
+                {% for item in order.items %}
+                <div class="d-flex justify-content-between small py-1 border-bottom">
+                    <span>{{ item.product_name }} ({{ item.condition|title }}) x{{ item.quantity }}</span>
+                    <span>P{{ '{:,.2f}'.format(item.line_total()) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if order.status == 'arrived' and not order.balance_paid %}
+            <div class="bg-white rounded-3 shadow-sm p-4 border border-warning">
+                <h6><i class="bi bi-bell me-1"></i>Your order has arrived!</h6>
+                <p class="small text-muted">Pay the remaining balance to arrange collection or delivery.</p>
+                <form method="POST" action="{{ url_for('account.pay_balance', order_id=order.id) }}">
+                    <select name="payment_method" class="form-select mb-2">
+                        {% for m in payment_methods %}
+                        <option value="{{ m }}">
+                            {% if m == 'orange_money' %}Orange Money
+                            {% elif m == 'mascom_myzaka' %}Mascom MyZaka
+                            {% elif m == 'card' %}Debit / Credit Card
+                            {% else %}Test Payment (Mock — for development){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" name="payer_identifier" class="form-control mb-2" placeholder="Phone or card reference" value="{{ current_user.phone or '' }}">
+                    <button type="submit" class="btn btn-orbit w-100">Pay Balance — P{{ '{:,.2f}'.format(order.balance_amount) }}</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-5">
+            <div class="bg-white rounded-3 shadow-sm p-4">
+                <h6>Payment Summary</h6>
+                <div class="d-flex justify-content-between small"><span>Total</span><span>P{{ '{:,.2f}'.format(order.total_amount) }}</span></div>
+                <div class="d-flex justify-content-between small"><span>Deposit</span><span>{{ 'Paid' if order.deposit_paid else 'Unpaid' }} — P{{ '{:,.2f}'.format(order.deposit_amount) }}</span></div>
+                <div class="d-flex justify-content-between small"><span>Balance</span><span>{{ 'Paid' if order.balance_paid else 'Due on arrival' }} — P{{ '{:,.2f}'.format(order.balance_amount) }}</span></div>
+                <hr>
+                <p class="small text-muted mb-1"><strong>Delivery:</strong> {{ order.delivery_method|title }}{% if order.campus %} — {{ order.campus }}{% endif %}</p>
+                {% if order.delivery_address %}<p class="small text-muted mb-0">{{ order.delivery_address }}</p>{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

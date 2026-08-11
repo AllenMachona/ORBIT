@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}About Us — {{ company_name }}{% endblock %}
+{% block content %}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h2>About {{ company_name }}</h2>
+            <p class="lead text-muted">{{ company_tagline }}</p>
+
+            <p>{{ company_name }} exists to make genuine, quality technology affordable and accessible to students
+            across Botswana. We source phones, laptops, and accessories — both brand new and carefully verified
+            refurbished units — and pass the savings on through our pre-order model.</p>
+
+            <h5 class="mt-4">Why Pre-Order?</h5>
+            <p>Instead of holding large amounts of inventory (which pushes prices up), we source your device once
+            you've committed with a {{ (config.DEPOSIT_PERCENTAGE * 100)|int }}% deposit. This keeps our prices
+            competitive and means you're never paying for warehouse costs baked into the price.</p>
+
+            <h5 class="mt-4">Trust &amp; Verification</h5>
+            <p>Every refurbished device is checked before it ships. Every order is tracked from deposit to delivery,
+            and you can see exactly where your order stands at any time from your account.</p>
+
+            <h5 class="mt-4">Campus Collection</h5>
+            <p>We partner with collection points across major campuses — BSBS College, University of Botswana,
+            Botho University, and BAISAGO College — with delivery also available if collection isn't convenient.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

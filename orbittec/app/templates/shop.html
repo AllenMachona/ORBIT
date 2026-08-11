@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Shop — {{ company_name }}{% endblock %}
+{% block content %}
+
+<div class="container my-4">
+    <div class="row">
+        <div class="col-lg-3 mb-4">
+            <div class="p-3 bg-white rounded-3 shadow-sm">
+                <form method="GET" action="{{ url_for('shop.catalog') }}">
+                    <label class="form-label fw-semibold small">Search</label>
+                    <input type="text" name="q" class="form-control form-control-sm mb-3" value="{{ search }}" placeholder="Search products...">
+
+                    <label class="form-label fw-semibold small">Category</label>
+                    <select name="category" class="form-select form-select-sm mb-3" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.slug }}" {{ 'selected' if selected_category == cat.slug }}>{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label class="form-label fw-semibold small">Condition</label>
+                    <div class="form-check">
+                        <input type="radio" name="condition" value="" id="condAll" class="form-check-input" {{ 'checked' if not selected_condition }} onchange="this.form.submit()">
+                        <label class="form-check-label small" for="condAll">All</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" name="condition" value="new" id="condNew" class="form-check-input" {{ 'checked' if selected_condition == 'new' }} onchange="this.form.submit()">
+                        <label class="form-check-label small" for="condNew">Brand New</label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input type="radio" name="condition" value="refurbished" id="condRefurb" class="form-check-input" {{ 'checked' if selected_condition == 'refurbished' }} onchange="this.form.submit()">
+                        <label class="form-check-label small" for="condRefurb">Refurbished</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-orbit btn-sm w-100">Apply Filters</button>
+                    {% if selected_category or selected_condition or search %}
+                    <a href="{{ url_for('shop.catalog') }}" class="btn btn-outline-secondary btn-sm w-100 mt-2">Clear Filters</a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">
+                    {% if selected_category %}{{ (categories|selectattr('slug', 'equalto', selected_category)|first).name }}{% else %}All Products{% endif %}
+                </h4>
+                <span class="text-muted small">{{ products|length }} item(s)</span>
+            </div>
+
+            {% if products %}
+            <div class="row g-3">
+                {% for product in products %}
+                <div class="col-6 col-md-4">
+                    <a href="{{ url_for('shop.product_detail', product_id=product.id) }}" class="text-decoration-none text-dark">
+                        <div class="product-card">
+                            <div class="position-relative">
+                                {% if product.image_path %}
+                                <img src="{{ url_for('static', filename='uploads/' + product.image_path) }}" alt="{{ product.name }}" loading="lazy">
+                                {% else %}
+                                <img src="https://placehold.co/400x400/eef1f6/6b7280?text={{ product.name|urlencode }}" alt="{{ product.name }}" loading="lazy">
+                                {% endif %}
+                                <span class="badge {{ 'badge-new' if product.condition == 'new' else 'badge-refurb' }} position-absolute top-0 start-0 m-2">
+                                    {{ product.condition_label() }}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-1 fw-semibold" style="font-size: 0.92rem;">{{ product.name }}</p>
+                                <p class="price mb-0">P{{ '{:,.2f}'.format(product.price) }}</p>
+                                <p class="deposit-hint">Deposit: P{{ '{:,.2f}'.format(product.deposit_amount()) }}</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 2.5rem; color: #ccc;"></i>
+                <p class="text-muted mt-2">No products match your filters.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

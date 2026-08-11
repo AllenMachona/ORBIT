@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if product else 'Add' }} Product — Admin{% endblock %}
+{% block content %}
+
+<div class="container my-4">
+    <a href="{{ url_for('admin.products') }}" class="small text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Back to Products</a>
+    <h3 class="mt-2 mb-4">{{ 'Edit' if product else 'Add' }} Product</h3>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <form method="POST" enctype="multipart/form-data" class="bg-white rounded-3 shadow-sm p-4">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Category</label>
+                        <select name="category_id" class="form-select" required>
+                            {% for c in categories %}
+                            <option value="{{ c.id }}" {{ 'selected' if product and product.category_id == c.id }}>{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Condition</label>
+                        <select name="condition" class="form-select" required>
+                            {% for c in conditions %}
+                            <option value="{{ c }}" {{ 'selected' if product and product.condition == c }}>{{ 'Brand New' if c == 'new' else 'Refurbished' }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Product Name</label>
+                    <input type="text" name="name" class="form-control" value="{{ product.name if product else '' }}" placeholder="e.g. iPhone 12 128GB" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Brand</label>
+                    <input type="text" name="brand" class="form-control" value="{{ product.brand if product else '' }}" placeholder="e.g. Apple">
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Price (BWP)</label>
+                        <input type="number" step="0.01" name="price" class="form-control" value="{{ product.price if product else '' }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Stock Quantity</label>
+                        <input type="number" name="stock_quantity" class="form-control" value="{{ product.stock_quantity if product else 0 }}">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-control" rows="3">{{ product.description if product else '' }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Specifications (one per line)</label>
+                    <textarea name="specs" class="form-control" rows="4" placeholder="RAM: 6GB&#10;Storage: 128GB&#10;Screen: 6.1 inch">{{ product.specs if product else '' }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Product Image</label>
+                    <input type="file" name="image" class="form-control" accept=".png,.jpg,.jpeg,.webp">
+                    {% if product and product.image_path %}
+                    <img src="{{ url_for('static', filename='uploads/' + product.image_path) }}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;" class="mt-2">
+                    {% endif %}
+                </div>
+
+                <div class="form-check mb-2">
+                    <input type="checkbox" name="is_preorder" id="isPreorder" class="form-check-input" {{ 'checked' if not product or product.is_preorder }}>
+                    <label class="form-check-label" for="isPreorder">This is a pre-order item</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input type="checkbox" name="is_trending" id="isTrending" class="form-check-input" {{ 'checked' if product and product.is_trending }}>
+                    <label class="form-check-label" for="isTrending">Feature on homepage (Trending)</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input type="checkbox" name="is_active" id="isActive" class="form-check-input" {{ 'checked' if not product or product.is_active }}>
+                    <label class="form-check-label" for="isActive">Active (visible in shop)</label>
+                </div>
+
+                <button type="submit" class="btn btn-orbit w-100">{{ 'Save Changes' if product else 'Add Product' }}</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

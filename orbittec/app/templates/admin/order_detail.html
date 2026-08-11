@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Order {{ order.order_number }} — Admin{% endblock %}
+{% block content %}
+
+<div class="container my-4">
+    <a href="{{ url_for('admin.dashboard') }}" class="small text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Back to Dashboard</a>
+    <div class="d-flex justify-content-between align-items-center mt-2 mb-4">
+        <h3 class="mb-0">{{ order.order_number }}</h3>
+        <span class="badge bg-secondary">{{ order.status_label() }}</span>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="bg-white rounded-3 shadow-sm p-4 mb-3">
+                <h6>Customer</h6>
+                <p class="mb-1">{{ order.customer.full_name() }} — {{ order.customer.email }}</p>
+                <p class="mb-0 small text-muted">{{ order.customer.phone or 'No phone on file' }} · {{ order.campus or 'No campus set' }}</p>
+            </div>
+
+            <div class="bg-white rounded-3 shadow-sm p-4 mb-3">
+                <h6>Items</h6>
+                {% for item in order.items %}
+                <div class="d-flex justify-content-between small py-1 border-bottom">
+                    <span>{{ item.product_name }} ({{ item.condition|title }}) x{{ item.quantity }}</span>
+                    <span>P{{ '{:,.2f}'.format(item.line_total()) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="bg-white rounded-3 shadow-sm p-4 mb-3">
+                <h6>Payments</h6>
+                {% if order.payments.count() %}
+                <table class="table table-sm">
+                    <thead><tr><th>Type</th><th>Method</th><th>Amount</th><th>Status</th><th>Reference</th></tr></thead>
+                    <tbody>
+                        {% for p in order.payments %}
+                        <tr>
+                            <td>{{ p.payment_type|title }}</td><td>{{ p.method|replace('_',' ')|title }}</td>
+                            <td>P{{ '{:,.2f}'.format(p.amount) }}</td>
+                            <td><span class="badge {{ 'bg-success' if p.status == 'completed' else 'bg-danger' }}">{{ p.status }}</span></td>
+                            <td class="small font-monospace">{{ p.provider_reference or '—' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}<p class="text-muted small mb-0">No payments recorded.</p>{% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="bg-white rounded-3 shadow-sm p-4 mb-3">
+                <h6>Admin Actions</h6>
+
+                {% if order.status == 'deposit_paid' %}
+                <form method="POST" action="{{ url_for('admin.mark_arrived', order_id=order.id) }}" onsubmit="return confirm('Mark this order as arrived? This will notify the customer to pay the balance.');">
+                    <button type="submit" class="btn btn-orbit w-100 mb-2"><i class="bi bi-box-seam me-1"></i>Mark as Arrived</button>
+                </form>
+                {% endif %}
+
+                {% if order.status == 'arrived' and order.balance_paid %}
+                <form method="POST" action="{{ url_for('admin.mark_delivered', order_id=order.id) }}" onsubmit="return confirm('Mark this order as delivered?');">
+                    <button type="submit" class="btn btn-orbit w-100 mb-2"><i class="bi bi-check2-circle me-1"></i>Mark as Delivered</button>
+                </form>
+                {% elif order.status == 'arrived' and not order.balance_paid %}
+                <p class="small text-muted">Waiting for customer to pay balance before delivery can be confirmed.</p>
+                {% endif %}
+
+                {% if order.status not in ('delivered', 'cancelled') %}
+                <details class="mt-2">
+                    <summary class="text-danger small" style="cursor:pointer;">Cancel Order</summary>
+                    <form method="POST" action="{{ url_for('admin.cancel_order', order_id=order.id) }}" class="mt-2">
+                        <textarea name="reason" class="form-control form-control-sm mb-2" rows="2" placeholder="Cancellation reason" required></textarea>
+                        <button type="submit" class="btn btn-outline-danger btn-sm w-100">Confirm Cancellation</button>
+                    </form>
+                </details>
+                {% endif %}
+            </div>
+
+            <div class="bg-white rounded-3 shadow-sm p-4">
+                <h6>Payment Summary</h6>
+                <div class="d-flex justify-content-between small"><span>Total</span><span>P{{ '{:,.2f}'.format(order.total_amount) }}</span></div>
+                <div class="d-flex justify-content-between small"><span>Deposit</span><span>{{ 'Paid' if order.deposit_paid else 'Unpaid' }} — P{{ '{:,.2f}'.format(order.deposit_amount) }}</span></div>
+                <div class="d-flex justify-content-between small"><span>Balance</span><span>{{ 'Paid' if order.balance_paid else 'Due' }} — P{{ '{:,.2f}'.format(order.balance_amount) }}</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

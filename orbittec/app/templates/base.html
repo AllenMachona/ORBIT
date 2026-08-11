@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ company_name }} — {{ company_tagline }}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-orbit navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('shop.home') }}">
+                {{ company_name }}
+                <small>{{ company_tagline }}</small>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('shop.catalog') }}">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('shop.catalog', category='phones') }}">Phones</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('shop.catalog', category='laptops') }}">Laptops</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('shop.catalog', category='accessories') }}">Accessories</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('pages.about') }}">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('pages.contact') }}">Contact / FAQ</a></li>
+                </ul>
+                <ul class="navbar-nav align-items-lg-center">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_admin %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-speedometer2 me-1"></i>Admin</a></li>
+                        {% endif %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('account.orders') }}"><i class="bi bi-box-seam me-1"></i>My Orders</a></li>
+                        <li class="nav-item position-relative">
+                            <a class="nav-link" href="{{ url_for('cart.view') }}">
+                                <i class="bi bi-cart3"></i>
+                                {% if cart_count > 0 %}<span class="cart-badge">{{ cart_count }}</span>{% endif %}
+                            </a>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-1"></i>Logout</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Login</a></li>
+                        <li class="nav-item"><a class="btn btn-orbit btn-sm ms-lg-2" href="{{ url_for('auth.register') }}">Sign Up</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'danger' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    {% block content %}{% endblock %}
+
+    <footer class="footer-orbit">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5 class="text-white">{{ company_name }}</h5>
+                    <p>{{ company_tagline }}. Affordable phones, laptops, and accessories — pre-ordered for you, delivered across Botswana's campuses.</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-white">Quick Links</h6>
+                    <p><a href="{{ url_for('shop.catalog') }}">Shop All</a></p>
+                    <p><a href="{{ url_for('pages.about') }}">About Us</a></p>
+                    <p><a href="{{ url_for('pages.contact') }}">Contact / FAQ</a></p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-white">How Pre-Orders Work</h6>
+                    <p>Pay 50% deposit today, we import your device, and you settle the balance when it arrives — about {{ config.PREORDER_LEAD_DAYS }} working days later.</p>
+                </div>
+            </div>
+            <hr style="border-color: rgba(255,255,255,0.15);">
+            <p class="mb-0 text-center">&copy; {{ now.year }} {{ company_name }}. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

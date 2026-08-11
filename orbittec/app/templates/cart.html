@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Your Cart — {{ company_name }}{% endblock %}
+{% block content %}
+
+<div class="container my-4">
+    <h3 class="mb-4"><i class="bi bi-cart3 me-2"></i>Your Cart</h3>
+
+    {% if items %}
+    <div class="row">
+        <div class="col-lg-8">
+            {% for item in items %}
+            <div class="bg-white rounded-3 shadow-sm p-3 mb-2 d-flex align-items-center gap-3">
+                {% if item.product.image_path %}
+                <img src="{{ url_for('static', filename='uploads/' + item.product.image_path) }}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;">
+                {% else %}
+                <img src="https://placehold.co/70x70/eef1f6/6b7280?text=%20" style="border-radius:8px;">
+                {% endif %}
+                <div class="flex-grow-1">
+                    <p class="mb-0 fw-semibold">{{ item.product.name }}</p>
+                    <p class="mb-0 small text-muted">{{ item.product.condition_label() }} · P{{ '{:,.2f}'.format(item.product.price) }} each</p>
+                </div>
+                <form method="POST" action="{{ url_for('cart.update', item_id=item.id) }}" class="d-flex align-items-center gap-2">
+                    <input type="number" name="quantity" value="{{ item.quantity }}" min="0" class="form-control form-control-sm" style="width:70px;" onchange="this.form.submit()">
+                </form>
+                <p class="mb-0 fw-bold" style="min-width:90px; text-align:right;">P{{ '{:,.2f}'.format(item.line_total()) }}</p>
+                <form method="POST" action="{{ url_for('cart.remove', item_id=item.id) }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="col-lg-4">
+            <div class="bg-white rounded-3 shadow-sm p-4">
+                <h5>Order Summary</h5>
+                <div class="d-flex justify-content-between my-2">
+                    <span>Subtotal</span><span class="fw-semibold">P{{ '{:,.2f}'.format(subtotal) }}</span>
+                </div>
+                <div class="deposit-box mt-3">
+                    <p class="small text-muted mb-0">Deposit due today ({{ (config.DEPOSIT_PERCENTAGE * 100)|int }}%)</p>
+                    <p class="amount mb-0">P{{ '{:,.2f}'.format(subtotal * config.DEPOSIT_PERCENTAGE) }}</p>
+                </div>
+                <a href="{{ url_for('checkout.checkout') }}" class="btn btn-orbit w-100 mt-3">Proceed to Checkout</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-cart-x" style="font-size: 2.5rem; color: #ccc;"></i>
+        <p class="text-muted mt-2">Your cart is empty.</p>
+        <a href="{{ url_for('shop.catalog') }}" class="btn btn-orbit">Start Shopping</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

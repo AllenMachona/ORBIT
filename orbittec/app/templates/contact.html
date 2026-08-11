@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Contact / FAQ — {{ company_name }}{% endblock %}
+{% block content %}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h2>Contact Us</h2>
+            <p class="text-muted">Have a question before ordering? Reach out — we're happy to help.</p>
+
+            <div class="bg-white rounded-3 shadow-sm p-4 mb-5">
+                <p class="mb-1"><i class="bi bi-envelope me-2"></i>orders@orbittec.co.bw</p>
+                <p class="mb-1"><i class="bi bi-whatsapp me-2"></i>WhatsApp us for quick questions</p>
+                <p class="mb-0"><i class="bi bi-geo-alt me-2"></i>Serving campuses across Botswana</p>
+            </div>
+
+            <h3>Frequently Asked Questions</h3>
+
+            <div class="accordion mt-3" id="faqAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                            Why do I only pay 50% upfront?
+                        </button>
+                    </h2>
+                    <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">Your deposit secures your order and lets us source your exact device.
+                        The remaining balance is due once it arrives — you never pay in full for something you haven't received yet.</div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                            How long does delivery take?
+                        </button>
+                    </h2>
+                    <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">Most pre-orders arrive within approximately {{ config.PREORDER_LEAD_DAYS }} working
+                        days of your deposit being confirmed. We'll notify you by email and SMS the moment your order arrives.</div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                            Is refurbished the same as used?
+                        </button>
+                    </h2>
+                    <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">Our refurbished devices are checked and verified before listing — clearly
+                        labeled so you always know exactly what condition you're buying, with no surprises.</div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                            How do I pay the balance when my order arrives?
+                        </button>
+                    </h2>
+                    <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">Once your order is marked "Arrived," you'll get a notification with a link
+                        to pay the remaining balance from your account, using the same payment options as your deposit.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
